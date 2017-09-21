@@ -113,7 +113,10 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		int cDiff = c2.c - c1.c;
 		int rDiff = c2.r - c1.r;
 		int dir = -1;
+
+		//Iterate through the cell's neighbours
 		for(int i = 0; i < Maze.NUM_DIR; i++) {
+			//If delta values equal the row and column differences, set the direction to i
 			if(rDiff == Maze.deltaR[i] && cDiff == Maze.deltaC[i]) {
 				dir = i;
 			}
@@ -149,12 +152,6 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 
 		//Return the list of cells
 		return cells;
-	}
-
-	private int getRndOfList(int[] items) {
-		//Setup random number generator
-		Random rnd = new Random();
-		return items[rnd.nextInt(items.length)];
 	}
 
 	private boolean isRectangularAdjacent(Cell c1, Cell c2) {

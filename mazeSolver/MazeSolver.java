@@ -12,7 +12,7 @@ import maze.Maze;
 public interface MazeSolver
 {
 	/**
-	 * Find the solusion on given maze.
+	 * Find the solution on given maze.
 	 * @param maze The maze to solve.
 	 */
 	public abstract void solveMaze(Maze maze);
