@@ -11,13 +11,77 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 
 	@Override
 	public void generateMaze(Maze maze) {
-		switch(maze.type) {
-			case Maze.NORMAL:
-				generateNormalMaze(maze);
-				break;
-			case Maze.HEX:
-				generateHexMaze(maze);
-				break;
+		//Generate Z and frontier lists
+		ArrayList<Cell> zList = new ArrayList();
+		ArrayList<Cell> fList = new ArrayList();
+		//Create a random number generator
+		Random rnd = new Random();
+		//Calculate a random initial starting cell
+		int startRow = (int)(rnd.nextDouble() * (double)maze.sizeR);
+		int startCol = (int)(rnd.nextDouble() * (double)maze.sizeC);
+
+		//If the maze is a hex maze
+		if(maze.type == Maze.HEX)
+			//Increment column to be in the (C + 1)/2 + C - 1 range
+			startCol += (startRow + 1) / 2;
+
+		//Get the randomly generated starting cell
+		Cell startCell = maze.map[startRow][startCol];
+		//Add the initial cell to the Z list
+		zList.add(startCell);
+		
+		//Iterate through the neighbours of the starting cell
+		for(int i = 0; i < Maze.NUM_DIR; i++) {
+			//If the neighbour cell exists
+			if(startCell.neigh[i] != null) {
+				//Add the neighbour cell to the frontier list
+				fList.add(startCell.neigh[i]);
+			}
+		}
+		
+		//If the z list doesn't encompass the entire list
+		while(fList.size() != 0) {
+			//Get a random cell from the frontier list
+			Cell c = fList.get(rnd.nextInt(fList.size()));
+			//Remove the cell from the frontier list
+			fList.remove(c);
+
+			//Start at a random index in the z list
+			int index = rnd.nextInt(zList.size());
+			//Stores the B cell
+			Cell b = null;
+			//Iterate until B equals something
+			while(b == null) {
+				//If cell is adjacent to c, use this cell
+				if(isAdjacent(maze, zList.get(index),c))
+					b = zList.get(index);
+
+				//Increment the index
+				index++;
+
+				//If the index is at the end of the list
+				if(index == zList.size())
+					//Go back to the start of the list
+					index = 0;
+			}
+
+			//Carve path betwen b and c
+			carvePath(maze, c, b);
+
+			//Add the item to the Z list
+			zList.add(c);
+
+			//Iterate through the neighbours of the c cell
+			for(int i = 0; i < Maze.NUM_DIR; i++) {
+				//If the neighbour cell exists
+				if(c.neigh[i] != null) {
+					//If this cell isn't already in the frontier list
+					if(!zList.contains(c.neigh[i]) && !fList.contains(c.neigh[i])) {
+						//Add the neighbour cell to the frontier list
+						fList.add(c.neigh[i]);
+					}
+				}
+			}
 		}
 		
 	} // end of generateMaze()
@@ -73,144 +137,6 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 
 		//If the maze is not hexagonal, return if it is rectanguarly adjacent
 		return isRectAdj;
-	}
-
-	private void generateNormalMaze(Maze maze) {
-		//Generate Z and frontier lists
-		ArrayList<Cell> zList = new ArrayList();
-		ArrayList<Cell> fList = new ArrayList();
-		//Create a random number generator
-		Random rnd = new Random();
-		//Calculate a random initial starting cell
-		int startRow = (int)(rnd.nextDouble() * (double)maze.sizeR);
-		int startCol = (int)(rnd.nextDouble() * (double)maze.sizeC);
-		Cell startCell = maze.map[startRow][startCol];
-		//Add the initial cell to the Z list
-		zList.add(startCell);
-		
-		//Iterate through the neighbours of the starting cell
-		for(int i = 0; i < Maze.NUM_DIR; i++) {
-			//If the neighbour cell exists
-			if(startCell.neigh[i] != null) {
-				//Add the neighbour cell to the frontier list
-				fList.add(startCell.neigh[i]);
-			}
-		}
-		
-		//If the z list doesn't encompass the entire list
-		while(fList.size() != 0) {
-			//Get a random cell from the frontier list
-			Cell c = fList.get(rnd.nextInt(fList.size()));
-			//Remove the cell from the frontier list
-			fList.remove(c);
-
-			//Start at a random index in the z list
-			int index = rnd.nextInt(zList.size());
-			//Stores the B cell
-			Cell b = null;
-			//Iterate until B equals something
-			while(b == null) {
-				//If cell is adjacent to c, use this cell
-				if(isAdjacent(maze, zList.get(index),c))
-					b = zList.get(index);
-
-				//Increment the index
-				index++;
-
-				//If the index is at the end of the list
-				if(index == zList.size())
-					//Go back to the start of the list
-					index = 0;
-			}
-
-			//Carve path betwen b and c
-			carvePath(maze, c, b);
-
-			//Add the item to the Z list
-			zList.add(c);
-
-			//Iterate through the neighbours of the c cell
-			for(int i = 0; i < Maze.NUM_DIR; i++) {
-				//If the neighbour cell exists
-				if(c.neigh[i] != null) {
-					//If this cell isn't already in the frontier list
-					if(!zList.contains(c.neigh[i]) && !fList.contains(c.neigh[i])) {
-						//Add the neighbour cell to the frontier list
-						fList.add(c.neigh[i]);
-					}
-				}
-			}
-			
-		}
-	}
-
-	private void generateHexMaze(Maze maze) {
-		//Generate Z and frontier lists
-		ArrayList<Cell> zList = new ArrayList();
-		ArrayList<Cell> fList = new ArrayList();
-		//Create a random number generator
-		Random rnd = new Random();
-		//Calculate a random initial starting cell
-		int startRow = (int)(rnd.nextDouble() * (double)maze.sizeR);
-		int startCol = (int)((rnd.nextDouble() * (double)maze.sizeC) + (startRow + 1) / 2);
-		Cell startCell = maze.map[startRow][startCol];
-		//Add the initial cell to the Z list
-		zList.add(startCell);
-		
-		//Iterate through the neighbours of the starting cell
-		for(int i = 0; i < Maze.NUM_DIR; i++) {
-			//If the neighbour cell exists
-			if(startCell.neigh[i] != null) {
-				//Add the neighbour cell to the frontier list
-				fList.add(startCell.neigh[i]);
-			}
-		}
-		
-		//If the z list doesn't encompass the entire list
-		while(fList.size() != 0) {
-			//Get a random cell from the frontier list
-			Cell c = fList.get(rnd.nextInt(fList.size()));
-			//Remove the cell from the frontier list
-			fList.remove(c);
-
-			//Start at a random index in the z list
-			int index = rnd.nextInt(zList.size());
-			//Stores the B cell
-			Cell b = null;
-			//Iterate until B equals something
-			while(b == null) {
-				//If cell is adjacent to c, use this cell
-				if(isAdjacent(maze, zList.get(index),c))
-					b = zList.get(index);
-
-				//Increment the index
-				index++;
-
-				//If the index is at the end of the list
-				if(index == zList.size())
-					//Go back to the start of the list
-					index = 0;
-			}
-
-			//Carve path betwen b and c
-			carvePath(maze, c, b);
-
-			//Add the item to the Z list
-			zList.add(c);
-
-			//Iterate through the neighbours of the c cell
-			for(int i = 0; i < Maze.NUM_DIR; i++) {
-				//If the neighbour cell exists
-				if(c.neigh[i] != null) {
-					//If this cell isn't already in the frontier list
-					if(!zList.contains(c.neigh[i]) && !fList.contains(c.neigh[i])) {
-						//Add the neighbour cell to the frontier list
-						fList.add(c.neigh[i]);
-					}
-				}
-			}
-			
-		}
 	}
 
 } // end of class ModifiedPrimsGenerator
