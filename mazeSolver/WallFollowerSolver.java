@@ -12,7 +12,6 @@ public class WallFollowerSolver implements MazeSolver {
 
 	private int cellsExplored = 0;
 	private boolean isSolved = false;
-	private int travelDir = 0;
 
 	private final int LEFT = 1;
 	private final int RIGHT = -1;

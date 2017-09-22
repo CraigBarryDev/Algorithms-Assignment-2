@@ -11,6 +11,10 @@ hex_prim_wallfollow:
 	make all
 	$(JAVA) $(FLAGS) $(BIN) MazeTester hex_prim_wallfollow.para y
 
+norm_growtree_wallfollow:
+	make all
+	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_growtree_wallfollow.para y
+
 norm_prim_wallfollow:
 	make all
 	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_prim_wallfollow.para y

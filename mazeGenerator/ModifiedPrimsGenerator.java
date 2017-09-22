@@ -16,17 +16,8 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		ArrayList<Cell> fList = new ArrayList();
 		//Create a random number generator
 		Random rnd = new Random();
-		//Calculate a random initial starting cell
-		int startRow = (int)(rnd.nextDouble() * (double)maze.sizeR);
-		int startCol = (int)(rnd.nextDouble() * (double)maze.sizeC);
-
-		//If the maze is a hex maze
-		if(maze.type == Maze.HEX)
-			//Increment column to be in the (C + 1)/2 + C - 1 range
-			startCol += (startRow + 1) / 2;
-
-		//Get the randomly generated starting cell
-		Cell startCell = maze.map[startRow][startCol];
+		//Get a randomly generated starting cell
+		Cell startCell = pickRandomCell(maze);
 		//Add the initial cell to the Z list
 		zList.add(startCell);
 		
@@ -85,6 +76,22 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		}
 		
 	} // end of generateMaze()
+
+	private Cell pickRandomCell(Maze m) {
+		//Create a random number generator
+		Random rnd = new Random();
+		//Calculate a random initial starting cell
+		int startRow = (int)(rnd.nextDouble() * (double)m.sizeR);
+		int startCol = (int)(rnd.nextDouble() * (double)m.sizeC);
+
+		//If the maze is a hex maze
+		if(m.type == Maze.HEX)
+			//Increment column to be in the (C + 1)/2 + C - 1 range
+			startCol += (startRow + 1) / 2;
+
+		//Return the starting cell from the list of maze cells
+		return m.map[startRow][startCol];
+	}
 
 	//Creates a path between two adjacent cells c1 and c2
 	private void carvePath(Maze m, Cell c1, Cell c2) {
