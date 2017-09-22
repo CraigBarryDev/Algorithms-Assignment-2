@@ -11,26 +11,9 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 
 	@Override
 	public void generateMaze(Maze maze) {
-		//Iterate through the rows of the maze
-		for(int i = 0; i < maze.sizeR; i++) {
-			//Iterate through the columns of the maze
-			for(int j = 0; j < maze.sizeC; j++) {
-				//Iterate through the walls of the cell
-				for(int k = 0; k < Maze.NUM_DIR; k++) {
-					//Create the wall objects for the cell
-					maze.map[i][j].wall[k] = new Wall();
-					//Set a wall on each side of the maze
-					maze.map[i][j].wall[k].present = true;
-				}
-			}
-		}
-
 		switch(maze.type) {
 			case Maze.NORMAL:
 				generateNormalMaze(maze);
-				break;
-			case Maze.TUNNEL:
-				generateTunnelMaze(maze);
 				break;
 			case Maze.HEX:
 				generateHexMaze(maze);
@@ -38,6 +21,59 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		}
 		
 	} // end of generateMaze()
+
+	//Creates a path between two adjacent cells c1 and c2
+	private void carvePath(Maze m, Cell c1, Cell c2) {
+		//Get the difference in column and row numbers
+		int cDiff = c2.c - c1.c;
+		int rDiff = c2.r - c1.r;
+		//Direction initially set to -1 as to detect an error
+		int dir = -1;
+
+		//Iterate through the cell's neighbours
+		for(int i = 0; i < Maze.NUM_DIR; i++) {
+			//If delta values equal the row and column differences, set the direction to i
+			if(rDiff == Maze.deltaR[i] && cDiff == Maze.deltaC[i]) {
+				dir = i;
+			}
+		}
+
+		assert(dir != -1);
+
+		//Set the wall to present from c1
+		m.map[c1.r][c1.c].wall[dir].present = false;
+		//Set the same wall present from c2
+		m.map[c2.r][c2.c].wall[Maze.oppoDir[dir]].present = false;
+	}
+
+	private boolean isAdjacent(Maze m, Cell c1, Cell c2) {
+		boolean isRectAdj = false;
+		boolean isHexAdj = false;
+
+		//If c2 is a NORTH, SOUTH, WEST or EAST neighbour of c1.
+		//Then c1 is a rectangularly adjacent of c2
+		if(c1.r + 1 == c2.r && c1.c == c2.c ||
+			c1.r - 1 == c2.r && c1.c == c2.c ||
+			c1.c + 1 == c2.c && c1.r == c2.r ||
+			c1.c - 1 == c2.c && c1.r == c2.r) {
+			isRectAdj = true;
+		}
+
+		//c1 will be hexagonally adjacent to c2 if the following
+		//is true (it will automatically be hexagonally adjacent
+		//if it was also rectanguarly adjacent)
+		if(c1.c - 1 == c2.c && c1.r - 1 == c2.r ||
+			c1.c + 1 == c2.c && c1.r + 1 == c2.r || isRectAdj) {
+			isHexAdj = true;
+		}
+
+		//If the maze is a hexagonal maze, return if it is hexagonally adjacent
+		if(m.type == Maze.HEX)
+			return isHexAdj;
+
+		//If the maze is not hexagonal, return if it is rectanguarly adjacent
+		return isRectAdj;
+	}
 
 	private void generateNormalMaze(Maze maze) {
 		//Generate Z and frontier lists
@@ -75,7 +111,7 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 			//Iterate until B equals something
 			while(b == null) {
 				//If cell is adjacent to c, use this cell
-				if(isRectangularAdjacent(zList.get(index),c))
+				if(isAdjacent(maze, zList.get(index),c))
 					b = zList.get(index);
 
 				//Increment the index
@@ -108,69 +144,73 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		}
 	}
 
-	//Creates a path between two adjacent cells c1 and c2
-	private void carvePath(Maze m, Cell c1, Cell c2) {
-		int cDiff = c2.c - c1.c;
-		int rDiff = c2.r - c1.r;
-		int dir = -1;
-
-		//Iterate through the cell's neighbours
+	private void generateHexMaze(Maze maze) {
+		//Generate Z and frontier lists
+		ArrayList<Cell> zList = new ArrayList();
+		ArrayList<Cell> fList = new ArrayList();
+		//Create a random number generator
+		Random rnd = new Random();
+		//Calculate a random initial starting cell
+		int startRow = (int)(rnd.nextDouble() * (double)maze.sizeR);
+		int startCol = (int)((rnd.nextDouble() * (double)maze.sizeC) + (startRow + 1) / 2);
+		Cell startCell = maze.map[startRow][startCol];
+		//Add the initial cell to the Z list
+		zList.add(startCell);
+		
+		//Iterate through the neighbours of the starting cell
 		for(int i = 0; i < Maze.NUM_DIR; i++) {
-			//If delta values equal the row and column differences, set the direction to i
-			if(rDiff == Maze.deltaR[i] && cDiff == Maze.deltaC[i]) {
-				dir = i;
+			//If the neighbour cell exists
+			if(startCell.neigh[i] != null) {
+				//Add the neighbour cell to the frontier list
+				fList.add(startCell.neigh[i]);
 			}
 		}
+		
+		//If the z list doesn't encompass the entire list
+		while(fList.size() != 0) {
+			//Get a random cell from the frontier list
+			Cell c = fList.get(rnd.nextInt(fList.size()));
+			//Remove the cell from the frontier list
+			fList.remove(c);
 
-		m.map[c1.r][c1.c].wall[dir].present = false;
-		m.map[c2.r][c2.c].wall[Maze.oppoDir[dir]].present = false;
-	}
+			//Start at a random index in the z list
+			int index = rnd.nextInt(zList.size());
+			//Stores the B cell
+			Cell b = null;
+			//Iterate until B equals something
+			while(b == null) {
+				//If cell is adjacent to c, use this cell
+				if(isAdjacent(maze, zList.get(index),c))
+					b = zList.get(index);
 
-	private Cell[] getRectangularNeighbouringCells(Maze m, Cell c) {
-		//Holds the neighbouring cells
-		Cell cells[] = new Cell[Maze.NUM_DIR];
+				//Increment the index
+				index++;
 
-		//Iterate through all the cells and set them to nothing
-		for(int i = 0; i < Maze.NUM_DIR; i++)
-			cells[i] = null;
-	
-		//If the cell isn't on the southern edge, get the southern cell
-		if(c.r != 0)
-			cells[Maze.SOUTH] = m.map[c.r + m.deltaR[Maze.SOUTH]][c.c + m.deltaC[Maze.SOUTH]];
+				//If the index is at the end of the list
+				if(index == zList.size())
+					//Go back to the start of the list
+					index = 0;
+			}
 
-		//If the cell isn't opn the north edge, get the northern cell
-		if(c.r != m.sizeR - 1)
-			cells[Maze.NORTH] = m.map[c.r + m.deltaR[Maze.NORTH]][c.c + m.deltaC[Maze.NORTH]];
+			//Carve path betwen b and c
+			carvePath(maze, c, b);
 
-		//If the cell isn't on the eastern edge, get the eastern cell
-		if(c.c != m.sizeC - 1)
-			cells[Maze.EAST] = m.map[c.r + m.deltaR[Maze.EAST]][c.c + m.deltaC[Maze.EAST]];
+			//Add the item to the Z list
+			zList.add(c);
 
-		//If the cell isn't on the west edge, get the western cell
-		if(c.c != 0)
-			cells[Maze.WEST] = m.map[c.r + m.deltaR[Maze.WEST]][c.c + m.deltaC[Maze.WEST]];
-
-		//Return the list of cells
-		return cells;
-	}
-
-	private boolean isRectangularAdjacent(Cell c1, Cell c2) {
-		if(c1.r + 1 == c2.r && c1.c == c2.c ||
-			c1.r - 1 == c2.r && c1.c == c2.c ||
-			c1.c + 1 == c2.c && c1.r == c2.r ||
-			c1.c - 1 == c2.c && c1.r == c2.r) {
-			return true;
+			//Iterate through the neighbours of the c cell
+			for(int i = 0; i < Maze.NUM_DIR; i++) {
+				//If the neighbour cell exists
+				if(c.neigh[i] != null) {
+					//If this cell isn't already in the frontier list
+					if(!zList.contains(c.neigh[i]) && !fList.contains(c.neigh[i])) {
+						//Add the neighbour cell to the frontier list
+						fList.add(c.neigh[i]);
+					}
+				}
+			}
+			
 		}
-
-		return false;
-	}
-
-	private void generateTunnelMaze(Maze maze) {
-
-	}
-
-	private void generateHexMaze(Maze maze) {
-
 	}
 
 } // end of class ModifiedPrimsGenerator

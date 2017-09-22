@@ -30,23 +30,19 @@ public class WallFollowerSolver implements MazeSolver {
 		while(cCell != maze.exit) {
 			//While the traveling direction can't go straight
 
-			if(canMoveLeft(cCell, travelDir)) {
+			if(canMoveLeft(maze, cCell, travelDir)) {
 				System.out.println("Turned Left");
-				travelDir = turnLeft(travelDir);
+				travelDir = turnLeft(maze, travelDir);
 			}else if(canMoveStraight(cCell, travelDir)) {
 				System.out.println("Went Straight");
 				//Do nothing
-			}else if(canMoveRight(cCell, travelDir)) {
+			}else if(canMoveRight(maze, cCell, travelDir)) {
 				System.out.println("Turned Right");
-				travelDir = turnRight(travelDir);
+				travelDir = turnRight(maze, travelDir);
 			}else {
 				travelDir = turnAround(travelDir);
 				System.out.println("Turned Around");
 			}
-
-			// while(!canMoveStraight(cCell, travelDir) && !canMoveLeft(cCell, travelDir))
-			// 	//Turn left
-			// 	travelDir = turnLeft(travelDir);
 
 			//Now that you can move straight, move straight
 			cCell = travelStraight(maze, cCell, travelDir);
@@ -62,7 +58,7 @@ public class WallFollowerSolver implements MazeSolver {
 
 	} // end of solveMaze()
 
-	private int turnLeft(int cDir) {
+	private int turnLeft(Maze m, int cDir) {
 		//Increment the direction
 		cDir += 1;
 		//If the direction is at the max
@@ -70,17 +66,29 @@ public class WallFollowerSolver implements MazeSolver {
 			//Return the first direction
 			cDir = 0;
 
+		if(m.type == Maze.NORMAL && cDir == Maze.NORTHEAST)
+			cDir += 1;
+
+		if(m.type == Maze.NORMAL && cDir == Maze.SOUTHWEST)
+			cDir += 1;
+
 		//Return the direction after turing left
 		return cDir;
 	}
 
-	private int turnRight(int cDir) {
+	private int turnRight(Maze m, int cDir) {
 		//Decrement the direction
 		cDir -= 1;
 		//If the direction is invalid
 		if(cDir == -1)
 			//Return the correct direction
 			cDir = Maze.NUM_DIR - 1;
+
+		if(m.type == Maze.NORMAL && cDir == Maze.NORTHEAST)
+			cDir -= 1;
+
+		if(m.type == Maze.NORMAL && cDir == Maze.SOUTHWEST)
+			cDir -= 1;
 
 		//Return the direction after turning right
 		return cDir;
@@ -102,13 +110,13 @@ public class WallFollowerSolver implements MazeSolver {
 		return !c.wall[dir].present;
 	}
 
-	private boolean canMoveLeft(Cell c, int dir) {
-		dir = turnLeft(dir);
+	private boolean canMoveLeft(Maze m, Cell c, int dir) {
+		dir = turnLeft(m, dir);
 		return !c.wall[dir].present && c.neigh[dir] != null;
 	}
 
-	private boolean canMoveRight(Cell c, int dir) {
-		dir = turnRight(dir);
+	private boolean canMoveRight(Maze m, Cell c, int dir) {
+		dir = turnRight(m, dir);
 		return !c.wall[dir].present && c.neigh[dir] != null;
 	}
     
