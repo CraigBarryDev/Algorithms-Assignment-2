@@ -7,9 +7,21 @@ SRC:=*.java
 all:
 	$(CC) $(FLAGS) $(BIN) $(SRC)
 
+hex_backtrack_wallfollow:
+	make all
+	$(JAVA) $(FLAGS) $(BIN) MazeTester hex_backtrack_wallfollow.para y
+
+hex_growtree_wallfollow:
+	make all
+	$(JAVA) $(FLAGS) $(BIN) MazeTester hex_growtree_wallfollow.para y
+
 hex_prim_wallfollow:
 	make all
 	$(JAVA) $(FLAGS) $(BIN) MazeTester hex_prim_wallfollow.para y
+
+norm_backtrack_wallfollow:
+	make all
+	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_backtrack_wallfollow.para y
 
 norm_growtree_wallfollow:
 	make all

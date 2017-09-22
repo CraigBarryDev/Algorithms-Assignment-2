@@ -108,9 +108,7 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 				dir = i;
 			}
 		}
-
-		assert(dir != -1);
-
+		
 		//Set the wall to present from c1
 		m.map[c1.r][c1.c].wall[dir].present = false;
 		//Set the same wall present from c2

@@ -32,10 +32,19 @@ public class GrowingTreeGenerator implements MazeGenerator {
 
 		//Iterate until the path is empty
 		do {
+			//Get the row and column indices of the current cell
+			int cellRow = cCell.r;
+			int cellCol = cCell.c;
+
+			//If the maze is a hex maze
+			if(maze.type == Maze.HEX)
+				//Decrement column to be in the 0 to C-1  range
+				cellCol -= (cellRow + 1) / 2;
+
 			//Set the current cell as visited
-			visited[cCell.r][cCell.c] = true;
+			visited[cellRow][cellCol] = true;
 			//Get the unvisited neighbours of the current cell
-			ArrayList<Cell> unvisitedNeighbours = getUnvisitedNeighbours(cCell, visited);
+			ArrayList<Cell> unvisitedNeighbours = getUnvisitedNeighbours(maze, cCell, visited);
 			
 			//If there are unvisited neighbours at this cell
 			if(unvisitedNeighbours.size() != 0) {
@@ -61,7 +70,7 @@ public class GrowingTreeGenerator implements MazeGenerator {
 		
 	}
 
-	private ArrayList<Cell> getUnvisitedNeighbours(Cell c, boolean[][] visitedCells) {
+	private ArrayList<Cell> getUnvisitedNeighbours(Maze m, Cell c, boolean[][] visitedCells) {
 		//Stores the unvisited neighbours
 		ArrayList<Cell> unvisitedNeighbours = new ArrayList();
 
@@ -69,8 +78,17 @@ public class GrowingTreeGenerator implements MazeGenerator {
 		for(int i = 0; i < Maze.NUM_DIR; i++) {
 			//If the neighbour cell exists
 			if(c.neigh[i] != null) {
+				//Get the row and column indices of the neighbour cell
+				int cellRow = c.neigh[i].r;
+				int cellCol = c.neigh[i].c;
+
+				//If the maze is a hex maze
+				if(m.type == Maze.HEX)
+					//Decrement column to be in the 0 to C-1  range
+					cellCol -= (cellRow + 1) / 2;
+
 				//If the cell is unvisited
-				if(!visitedCells[c.neigh[i].r][c.neigh[i].c]) {
+				if(!visitedCells[cellRow][cellCol]) {
 					//Add to the list of unvisited neighbours
 					unvisitedNeighbours.add(c.neigh[i]);
 				}
@@ -122,8 +140,6 @@ public class GrowingTreeGenerator implements MazeGenerator {
 				dir = i;
 			}
 		}
-
-		assert(dir != -1);
 
 		//Set the wall to present from c1
 		m.map[c1.r][c1.c].wall[dir].present = false;
