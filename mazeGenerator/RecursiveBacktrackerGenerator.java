@@ -18,15 +18,6 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 		//Stores the cells that have been visited
 		boolean visited[][] = new boolean[maze.sizeR][maze.sizeC];
 
-		//Iterate through all the rows in the maze
-		for(int i = 0; i < maze.sizeR; i++) {
-			//Iterate through all the columns in the maze
-			for(int j = 0; j < maze.sizeC; j++) {
-				//Set all cells to unvisited
-				visited[i][j] = false;
-			}
-		}
-
 		//Iterate until the path is empty
 		do {
 			//Get the row and column indices of the current cell
