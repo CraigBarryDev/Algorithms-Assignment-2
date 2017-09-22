@@ -11,51 +11,36 @@ import maze.Wall;
 public class WallFollowerSolver implements MazeSolver {
 
 	private int cellsExplored = 0;
-	private int travelDir = 0;
-	private Cell cCell = null;
 	private boolean isSolved = false;
+	private int travelDir = 0;
 
 	private final int LEFT = 1;
 	private final int RIGHT = -1;
 	
 	@Override
 	public void solveMaze(Maze maze) {
+		//Stores the current cell (starting at the entrance)
+		Cell cCell = maze.entrance;
+		//Stores the current direction (starting north)
+		int travelDir = Maze.NORTH;
 		//Reset the number of cells explored
 		cellsExplored = 0;
 		//Reset whether the maze was solved
 		isSolved = false;
-		//Stores the current cell (starting at the entrance cell)
-		cCell = maze.entrance;
-		//Stores the current direction (starting north)
-		travelDir = Maze.NORTH;
+		
 
 		//Loop until the exit is reached
 		while(cCell != maze.exit) {
-			//While the traveling direction can't go straight
-
-			// if(canMoveLeft(maze, cCell, travelDir)) {
-			// 	System.out.println("Turned Left");
-			// 	travelDir = turn(maze, travelDir, LEFT);
-			// }else if(canMoveStraight(cCell, travelDir)) {
-			// 	System.out.println("Went Straight");
-			// 	//Do nothing
-			// }else if(canMoveRight(maze, cCell, travelDir)) {
-			// 	System.out.println("Turned Right");
-			// 	travelDir = turn(maze, travelDir, RIGHT);
-			// }else {
-			// 	travelDir = turnAround(travelDir);
-			// 	System.out.println("Turned Around");
-			// }
-
-			//Get the next direction to travel
+			//Get the next direction to travel (the leftmost adjacent cell with no wall)
 			travelDir = getNextTravelDirection(maze, cCell, travelDir);
 
-			//Now that you can move straight, move straight
+			//Travel the given travel direction
 			cCell = travelStraight(maze, cCell, travelDir);
 
 			//Increment the number of cells explored
 			cellsExplored++;
 
+			//Draw to visualize that a cell has been visited
 			maze.drawFtPrt(cCell);
 		}
 
@@ -89,10 +74,6 @@ public class WallFollowerSolver implements MazeSolver {
 		return cDir;
 	}
 
-	private int turnAround(int cDir) {
-		return Maze.oppoDir[cDir];
-	}
-
 	private Cell travelStraight(Maze m, Cell c, int dir) {
 		//Calculate the final position after the movement
 		Cell fCell = m.map[c.r + Maze.deltaR[dir]][c.c + Maze.deltaC[dir]];
@@ -103,16 +84,6 @@ public class WallFollowerSolver implements MazeSolver {
 	private boolean canMoveStraight(Cell c, int dir) {
 		//If there is no wall in the current direction
 		return !c.wall[dir].present;
-	}
-
-	private boolean canMoveLeft(Maze m, Cell c, int dir) {
-		dir = turn(m, dir, LEFT);
-		return !c.wall[dir].present && c.neigh[dir] != null;
-	}
-
-	private boolean canMoveRight(Maze m, Cell c, int dir) {
-		dir = turn(m, dir, RIGHT);
-		return !c.wall[dir].present && c.neigh[dir] != null;
 	}
 
 	private int getNextTravelDirection(Maze m, Cell c, int dir) {
