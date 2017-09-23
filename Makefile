@@ -36,6 +36,10 @@ norm_growtree_wallfollow:
 	make compile
 	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_growtree_wallfollow.para y
 
+norm_prim_backtrack:
+	make compile
+	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_prim_backtrack.para y
+
 norm_prim_wallfollow:
 	make compile
 	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_prim_wallfollow.para y
