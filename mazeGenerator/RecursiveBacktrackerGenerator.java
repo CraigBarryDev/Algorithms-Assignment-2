@@ -17,6 +17,7 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 		LinkedList<Cell> path = new LinkedList();
 		//Stores the cells that have been visited
 		boolean visited[][] = new boolean[maze.sizeR][maze.sizeC];
+		//Stores whether the last movement was going through a tunnel
 		boolean tunneled = false;
 
 		//Iterate until the path is empty
@@ -35,16 +36,17 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 			//Get the unvisited neighbours of the current cell
 			ArrayList<Cell> unvisitedNeighbours = getUnvisitedNeighbours(maze, cCell, visited);
 
+			//If the current cell has a tunnel on it (and the last step wasn't moving,
+			//through a tunnel, as to not get the function in an infinite loop of moving
+			//through the same tunnel)
 			if(cCell.tunnelTo != null && !tunneled) {
+				//Move through the tunnel
 				cCell = cCell.tunnelTo;
+				//Set the tunneled flag to stop an infinite loop
 				tunneled = true;
-				continue;
 			}
-			tunneled = false;
-
-
 			//If there are unvisited neighbours at this cell
-			if(unvisitedNeighbours.size() != 0) {
+			else if(unvisitedNeighbours.size() != 0) {
 				//Add the current cell the current path
 				path.add(cCell);
 				//Pick a random unvisited neighbour
@@ -53,6 +55,8 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 				carvePath(maze, cCell, nextCell);
 				//The next cell will now become the current cell
 				cCell = nextCell;
+				//Unset the tunneled flag
+				tunneled = false;
 			}else {
 				//Remove the current cell from the path
 				path.removeLast();
@@ -61,6 +65,9 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 				if(path.size() != 0)
 					//The current cell is now the previous item (the new tail of the path)
 					cCell = path.getLast();
+
+				//Unset the tunneled flag
+				tunneled = false;
 			}
 
 		}while(path.size() != 0);

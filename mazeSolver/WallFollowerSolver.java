@@ -4,6 +4,8 @@ import maze.Cell;
 import maze.Maze;
 import maze.Wall;
 
+import java.util.*;
+
 /**
  * Implements WallFollowerSolver
  */
@@ -26,10 +28,56 @@ public class WallFollowerSolver implements MazeSolver {
 		cellsExplored = 0;
 		//Reset whether the maze was solved
 		isSolved = false;
-		
+		//Stores whether the last movement was going through a tunnel
+		boolean tunneled = false;
+
+		//Stores the entrance/exit directions of each tunnel
+		HashMap<Cell,Integer> tunnelDirections = new HashMap();
+		//Stores the number of tunnels
+		int nTunnels = 0;
+		//Iterate through the cells in the maze
+		for(int i = 0; i < maze.sizeR; i++) {
+			for(int j = 0; j < maze.sizeC; j++) {
+				//Get the row and column indices of the current cell
+				int cellRow = i;
+				int cellCol = j;
+
+				//If the maze is a hex maze
+				if(maze.type == Maze.HEX)
+					//Decrement column to be in the 0 to C-1  range
+					cellCol -= (cellRow + 1) / 2;
+
+				if(maze.map[cellRow][cellCol].tunnelTo != null) {
+					//Initially each tunnel direction is set to north
+					tunnelDirections.put(maze.map[cellRow][cellCol], Maze.NORTH);
+				}
+			}
+		}	
 
 		//Loop until the exit is reached
 		while(cCell != maze.exit) {
+			//If the current cell has a tunnel on it (and the last step wasn't moving,
+			//through a tunnel, as to not get the function in an infinite loop of moving
+			//through the same tunnel)
+			if(cCell.tunnelTo != null && !tunneled) {
+				//Set the entrance tunnel's travel direction to the current travel direction,
+				//this will ensure we are traveling the same direction if we exit the tunnel
+				tunnelDirections.put(cCell, travelDir);
+				//Move through the tunnel
+				cCell = cCell.tunnelTo;
+				//Set the travel direction to the exit tunnel's travel direction, this will ensure
+				//If we go through the tunnel multiple times we check all directions rather than
+				//whatever direction we were travelling when we went through the entrance portal
+				travelDir = tunnelDirections.get(cCell);
+				//Draw to visualize that a cell has been visited
+				maze.drawFtPrt(cCell);
+				//Set the tunneled flag to stop an infinite loop
+				tunneled = true;
+			}else {
+				//Unset the tunneled flag
+				tunneled = false;
+			}
+
 			//Get the next direction to travel (the leftmost adjacent cell with no wall)
 			travelDir = getNextTravelDirection(maze, cCell, travelDir);
 
