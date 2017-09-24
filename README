@@ -16,14 +16,12 @@ Maze Types:
 
 
 Generation Methods:
-
 -Recursive Backingtracking (DFS)
 -Primm's Algorithm
 -Growing Tree Generation (combination of above two)
 
 
 Solving Methods:
-
 -BiDirectional Recursive Backtracking (2 simultaneous DFS from the entrance and exit)
 -Following the Left Wall
 
