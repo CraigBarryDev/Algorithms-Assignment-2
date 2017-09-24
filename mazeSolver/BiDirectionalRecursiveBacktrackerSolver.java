@@ -19,6 +19,7 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 
 	@Override
 	public void solveMaze(Maze maze) {
+		//Initialize solving state
 		isSolved = false;
 		cellsExplored = 0;
 		int turn = 0;
@@ -66,7 +67,6 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 			if(cCellFExit == maze.entrance) isSolved = true;
 		}while(!isSolved);
 
-		// isSolved = cCellFEntrance.c == cCellFExit.c && cCellFExit.r == cCellFEntrance.c;
 	} // end of solveMaze()
 
 	//Performs a step in the DFS search and returns the current Cell after the step has completed
@@ -87,13 +87,12 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 			//Decrement column to be in the 0 to C-1  range
 			cellCol -= (cellRow + 1) / 2;
 
-		if(visitedCells[cellRow][cellCol]) {
+		if(!visitedCells[cellRow][cellCol]) {
 			//Increment the number of cells explored
 			cellsExplored++;
-		}else {
-			//Set the current cell as visited
-			visitedCells[cellRow][cellCol] = true;
 		}
+		//Set the current cell as visited
+		visitedCells[cellRow][cellCol] = true;
 
 		//Get the next possible cells to visit
 		ArrayList<Cell> possibleNeighbours = getAccesibleUnvisitedNeighbours(maze, cCell, visitedCells);
@@ -103,20 +102,33 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 
 		//If there are unvisited neighbours at this cell
 		if(possibleNeighbours.size() != 0) {
+			System.out.println("<GOING TO NEW CELL>");
+			System.out.println("<" + cCell.r +  "><" + cCell.c + ">");
+			System.out.println("</GOTING TO NEW CELL>");
 			//Add the current cell the current path
 			path.add(cCell);
 			//Pick a random neighbour and move to it
 			cCell = getRandElem(possibleNeighbours);
+
+			System.out.println("<THE TO NEW CELL>");
+			System.out.println("<" + cCell.r +  "><" + cCell.c + ">");
+			System.out.println("</THE TO NEW CELL>");
 		}else {
+			System.out.println("<PATH>");
+			for(int i = 0; i < path.size(); i++) {
+				System.out.println("<" + path.get(i).r +  "><" + path.get(i).c + ">");
+			}
+			System.out.println("</PATH>");
+
+
 			//Get the last cell in the path
 			Cell pathTail = path.getLast();
-			//If this is not the same as the current cell, add it to the path first
-			if(pathTail != cCell)
-				//Add the current cell the current path
-				path.add(cCell);
-			
-			//Remove the current cell from the path
-			path.removeLast();
+			//Only remove from the path if it is actually in the path, or if it is a tunnel
+			//cell (otherwise you can get stuck in a infinite loop of moving through the same tunnel)
+			if(pathTail == cCell || cCell.tunnelTo != null){
+				//Remove the current cell from the path
+				path.removeLast();
+			}
 
 			//If there is still items left in the path
 			if(path.size() != 0){
@@ -129,6 +141,8 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 	}
 
 	private Cell goThroughTunnel(Maze maze, Cell cell, LinkedList<Cell> path, boolean[][] visitedCells) {
+		System.out.println("<GOING THROUGH A TUNNEL>");
+
 		//Get the row and column indices of the current cell
 		int cellRow = cell.r;
 		int cellCol = cell.c;
@@ -176,8 +190,6 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 				
 				//If there is no wall between the cells and it hasn't been visited
 				if(!c.wall[i].present && !visitedCells[cellRow][cellCol])
-				// if(!visitedCells[cellRow][cellCol])
-				// if(!c.wall[i].present)
 					//Add it to the list of unvisited & accessible neighbours
 					neighbours.add(c.neigh[i]);
 			}
