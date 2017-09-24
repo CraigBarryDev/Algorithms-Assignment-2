@@ -37,6 +37,7 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 		boolean exitVisited[][] = new boolean[maze.sizeR][maze.sizeC];
 
 		do {
+			//Do 1 step in the DFS search of both steps
 			cCellFEntrance = dfsStep(maze, cCellFEntrance, entrancePath, entranceVisited);
 			cCellFExit = dfsStep(maze, cCellFExit, exitPath, exitVisited);
 
@@ -71,6 +72,12 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 	//Performs a step in the DFS search and returns the current Cell after the step has completed
 	//cCell, path and visitedCells may be modified in the process
 	private Cell dfsStep(Maze maze, Cell cCell, LinkedList<Cell> path, boolean[][] visitedCells) {
+		//If this cell is a tunnel, go through the tunnel
+		if(cCell.tunnelTo != null) {
+			//Go through the tunnel and update state accordingly
+			cCell = goThroughTunnel(maze, cCell, path, visitedCells);
+		}
+
 		//Get the row and column indices of the current cell
 		int cellRow = cCell.r;
 		int cellCol = cCell.c;
@@ -118,20 +125,35 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 			}
 		}
 
-		// sleep(3000);
-
 		return cCell;
 	}
 
-	private void sleep(int milliseconds) {
-		try        
-		{
-		    Thread.sleep(milliseconds);
-		} 
-		catch(InterruptedException ex) 
-		{
-		    Thread.currentThread().interrupt();
+	private Cell goThroughTunnel(Maze maze, Cell cell, LinkedList<Cell> path, boolean[][] visitedCells) {
+		//Get the row and column indices of the current cell
+		int cellRow = cell.r;
+		int cellCol = cell.c;
+
+		//If the maze is a hex maze
+		if(maze.type == Maze.HEX)
+			//Decrement column to be in the 0 to C-1  range
+			cellCol -= (cellRow + 1) / 2;
+
+		if(visitedCells[cellRow][cellCol]) {
+			//Increment the number of cells explored
+			cellsExplored++;
+		}else {
+			//Set the current cell as visited
+			visitedCells[cellRow][cellCol] = true;
 		}
+
+		//Draw to visualize that a cell has been visited
+		maze.drawFtPrt(cell);	
+
+		//Go through the tunnel
+		cell = cell.tunnelTo;
+
+		//Return the cell at the exit of the tunnel
+		return cell;
 	}
 
 	private ArrayList<Cell> getAccesibleUnvisitedNeighbours(Maze m, Cell c, boolean[][] visitedCells) {
