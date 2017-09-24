@@ -70,7 +70,13 @@ norm_prim_wallfollow:
 	make compile
 	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_prim_wallfollow.para y
 
+tunnel_backtrack_backtrack:
+	make compile
+	$(JAVA) $(FLAGS) $(BIN) MazeTester tunnel_backtrack_backtrack.para y
+
 tunnel_backtrack_wallfollow:
 	make compile
 	$(JAVA) $(FLAGS) $(BIN) MazeTester tunnel_backtrack_wallfollow.para y
+
+
 
