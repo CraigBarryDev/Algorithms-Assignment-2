@@ -102,25 +102,11 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 
 		//If there are unvisited neighbours at this cell
 		if(possibleNeighbours.size() != 0) {
-			System.out.println("<GOING TO NEW CELL>");
-			System.out.println("<" + cCell.r +  "><" + cCell.c + ">");
-			System.out.println("</GOTING TO NEW CELL>");
 			//Add the current cell the current path
 			path.add(cCell);
 			//Pick a random neighbour and move to it
 			cCell = getRandElem(possibleNeighbours);
-
-			System.out.println("<THE TO NEW CELL>");
-			System.out.println("<" + cCell.r +  "><" + cCell.c + ">");
-			System.out.println("</THE TO NEW CELL>");
 		}else {
-			System.out.println("<PATH>");
-			for(int i = 0; i < path.size(); i++) {
-				System.out.println("<" + path.get(i).r +  "><" + path.get(i).c + ">");
-			}
-			System.out.println("</PATH>");
-
-
 			//Get the last cell in the path
 			Cell pathTail = path.getLast();
 			//Only remove from the path if it is actually in the path, or if it is a tunnel
