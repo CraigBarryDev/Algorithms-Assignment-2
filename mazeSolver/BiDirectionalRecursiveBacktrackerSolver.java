@@ -14,64 +14,125 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 	private boolean isSolved = false;
 	private int cellsExplored = 0;
 
+	private final int ENTRANCE = 0;
+	private final int EXIT = 1;
+
 	@Override
 	public void solveMaze(Maze maze) {
-		boolean visited[][] = new boolean[maze.sizeR][maze.sizeC];
 		isSolved = false;
 		cellsExplored = 0;
+		int turn = 0;
 		
 		//The current cell is the start of the maze
-		Cell cCell = maze.entrance;
+		Cell cCellFEntrance = maze.entrance;
+		Cell cCellFExit = maze.exit;
+		//Stores the current cell of whichever DFS is currently executing
+		Cell cCell = null;
 
 		//Stores the current path from the starting cell
-		LinkedList<Cell> path = new LinkedList();
+		LinkedList<Cell> entrancePath = new LinkedList();
+		LinkedList<Cell> exitPath = new LinkedList();
+		//Stores the cells that have been visited
+		boolean entranceVisited[][] = new boolean[maze.sizeR][maze.sizeC];
+		boolean exitVisited[][] = new boolean[maze.sizeR][maze.sizeC];
 
 		do {
-			
+			cCellFEntrance = dfsStep(maze, cCellFEntrance, entrancePath, entranceVisited);
+			cCellFExit = dfsStep(maze, cCellFExit, exitPath, exitVisited);
+
 			//Get the row and column indices of the current cell
-			int cellRow = cCell.r;
-			int cellCol = cCell.c;
+			int cellRow = cCellFExit.r;
+			int cellCol = cCellFExit.c;
 
 			//If the maze is a hex maze
 			if(maze.type == Maze.HEX)
 				//Decrement column to be in the 0 to C-1  range
 				cellCol -= (cellRow + 1) / 2;
 
-			//Set the current cell as visited
-			visited[cellRow][cellCol] = true;
-			//Get the next possible cells to visit
-			ArrayList<Cell> possibleNeighbours = getAccesibleUnvisitedNeighbours(maze, cCell, visited);
+			if(entranceVisited[cellRow][cellCol]) isSolved = true;
 
-			//If there are unvisited neighbours at this cell
-			if(possibleNeighbours.size() != 0) {
+			//Get the row and column indices of the current cell
+			cellRow = cCellFEntrance.r;
+			cellCol = cCellFEntrance.c;
+
+			//If the maze is a hex maze
+			if(maze.type == Maze.HEX)
+				//Decrement column to be in the 0 to C-1  range
+				cellCol -= (cellRow + 1) / 2;
+
+			if(exitVisited[cellRow][cellCol]) isSolved = true;
+			if(cCellFEntrance == maze.exit) isSolved = true;
+			if(cCellFExit == maze.entrance) isSolved = true;
+		}while(!isSolved);
+
+		// isSolved = cCellFEntrance.c == cCellFExit.c && cCellFExit.r == cCellFEntrance.c;
+	} // end of solveMaze()
+
+	//Performs a step in the DFS search and returns the current Cell after the step has completed
+	//cCell, path and visitedCells may be modified in the process
+	private Cell dfsStep(Maze maze, Cell cCell, LinkedList<Cell> path, boolean[][] visitedCells) {
+		//Get the row and column indices of the current cell
+		int cellRow = cCell.r;
+		int cellCol = cCell.c;
+
+		//If the maze is a hex maze
+		if(maze.type == Maze.HEX)
+			//Decrement column to be in the 0 to C-1  range
+			cellCol -= (cellRow + 1) / 2;
+
+		if(visitedCells[cellRow][cellCol]) {
+			//Increment the number of cells explored
+			cellsExplored++;
+		}else {
+			//Set the current cell as visited
+			visitedCells[cellRow][cellCol] = true;
+		}
+
+		//Get the next possible cells to visit
+		ArrayList<Cell> possibleNeighbours = getAccesibleUnvisitedNeighbours(maze, cCell, visitedCells);
+
+		//Draw to visualize that a cell has been visited
+		maze.drawFtPrt(cCell);	
+
+		//If there are unvisited neighbours at this cell
+		if(possibleNeighbours.size() != 0) {
+			//Add the current cell the current path
+			path.add(cCell);
+			//Pick a random neighbour and move to it
+			cCell = getRandElem(possibleNeighbours);
+		}else {
+			//Get the last cell in the path
+			Cell pathTail = path.getLast();
+			//If this is not the same as the current cell, add it to the path first
+			if(pathTail != cCell)
 				//Add the current cell the current path
 				path.add(cCell);
-				//Pick a random neighbour and move to it
-				cCell = getRandElem(possibleNeighbours);
-				//Increment the number of cells explored
-				cellsExplored++;
-				//Draw to visualize that a cell has been visited
-				maze.drawFtPrt(cCell);
-			}else {
-				//Remove the current cell from the path
-				path.removeLast();
+			
+			//Remove the current cell from the path
+			path.removeLast();
 
-				//If there is still items left in the path
-				if(path.size() != 0)
-					//The current cell is now the previous item (the new tail of the path)
-					cCell = path.getLast();
+			//If there is still items left in the path
+			if(path.size() != 0){
+				//The current cell is now the previous item (the new tail of the path)
+				cCell = path.getLast();
 			}
+		}
 
-		}while(cCell != maze.exit || cCell == null);
+		// sleep(3000);
 
-		System.out.println("MAZE FINISHED SOLVING");
-		System.out.println("Cell: " + (cCell == null));
+		return cCell;
+	}
 
-		isSolved = cCell != null;
-
-
-
-	} // end of solveMaze()
+	private void sleep(int milliseconds) {
+		try        
+		{
+		    Thread.sleep(milliseconds);
+		} 
+		catch(InterruptedException ex) 
+		{
+		    Thread.currentThread().interrupt();
+		}
+	}
 
 	private ArrayList<Cell> getAccesibleUnvisitedNeighbours(Maze m, Cell c, boolean[][] visitedCells) {
 		//Stores the unvisited and accessible neighbours
@@ -93,6 +154,8 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 				
 				//If there is no wall between the cells and it hasn't been visited
 				if(!c.wall[i].present && !visitedCells[cellRow][cellCol])
+				// if(!visitedCells[cellRow][cellCol])
+				// if(!c.wall[i].present)
 					//Add it to the list of unvisited & accessible neighbours
 					neighbours.add(c.neigh[i]);
 			}

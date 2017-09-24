@@ -17,6 +17,7 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 		LinkedList<Cell> path = new LinkedList();
 		//Stores the cells that have been visited
 		boolean visited[][] = new boolean[maze.sizeR][maze.sizeC];
+		boolean tunneled = false;
 
 		//Iterate until the path is empty
 		do {
@@ -33,7 +34,15 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 			visited[cellRow][cellCol] = true;
 			//Get the unvisited neighbours of the current cell
 			ArrayList<Cell> unvisitedNeighbours = getUnvisitedNeighbours(maze, cCell, visited);
-			
+
+			if(cCell.tunnelTo != null && !tunneled) {
+				cCell = cCell.tunnelTo;
+				tunneled = true;
+				continue;
+			}
+			tunneled = false;
+
+
 			//If there are unvisited neighbours at this cell
 			if(unvisitedNeighbours.size() != 0) {
 				//Add the current cell the current path
