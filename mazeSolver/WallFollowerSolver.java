@@ -69,55 +69,50 @@ public class WallFollowerSolver implements MazeSolver {
 			visited[cCell.r][convertCellCol(maze, cCell)] = true;
 			
 
-			//If the current cell has a tunnel on it (and the last step wasn't moving,
-			//through a tunnel, as to not get the function in an infinite loop of moving
-			//through the same tunnel)
-			// if(cCell.tunnelTo != null && !tunneled) {
-			// 	//Set the entrance tunnel's travel direction to the current travel direction,
-			// 	//this will ensure we are traveling the same direction if we exit the tunnel
-			// 	tunnelDirections.put(cCell, travelDir);
-			// 	//Move through the tunnel
-			// 	cCell = cCell.tunnelTo;
-			// 	//Set the travel direction to the exit tunnel's travel direction, this will ensure
-			// 	//If we go through the tunnel multiple times we check all directions rather than
-			// 	//whatever direction we were travelling when we went through the entrance portal
-			// 	travelDir = tunnelDirections.get(cCell);
-			// 	//Draw to visualize that a cell has been visited
-			// 	maze.drawFtPrt(cCell);
-			// 	//Set the tunneled flag to stop an infinite loop
-			// 	tunneled = true;
-			// }else {
-			// 	//Unset the tunneled flag
-			// 	tunneled = false;
-			// }
+			// If the current cell has a tunnel on it (and the last step wasn't moving,
+			// through a tunnel, as to not get the function in an infinite loop of moving
+			// through the same tunnel)
+			if(cCell.tunnelTo != null && !tunneled) {
+				//Set the entrance tunnel's travel direction to the current travel direction,
+				//this will ensure we are traveling the same direction if we exit the tunnel
+				tunnelDirections.put(cCell, travelDir);
+				//Move through the tunnel
+				cCell = cCell.tunnelTo;
+				//Set the travel direction to the exit tunnel's travel direction, this will ensure
+				//If we go through the tunnel multiple times we check all directions rather than
+				//whatever direction we were travelling when we went through the entrance portal
+				travelDir = tunnelDirections.get(cCell);
+				//Increment the number of explored cells
+				cellsExplored++;
+				//Draw to visualize that a cell has been visited
+				maze.drawFtPrt(cCell);
+				//Set the tunneled flag to stop an infinite loop
+				tunneled = true;
+				continue;
+			}else {
+				//Unset the tunneled flag
+				tunneled = false;
+			}
 
 			//Get the possible travel directions
 			ArrayList<Integer> travelDirections = getPossibleTravelDirections(maze, cCell, travelDir, visited);
 
 			//If there is more than 1 direction that can be travlled
 			if(travelDirections.size() != 0) {
+				//Add the additional directions to 
+				addCheckpoints(1, cCell, checkpoints, travelDirections);
 				//Set the travel direction to the leftmost direction
 				//(the leftmost will always be first in the list)
 				travelDir = travelDirections.get(0);
-
-				//Iterate through the remianing travel directions
-				for(int i = 1; i < travelDirections.size(); i++) {
-					//Gets the neighbouring cell in the travel direction
-					Cell nc = cCell.neigh[travelDirections.get(i)];
-					//Add them to the list of checkpoints in clockwise order
-					checkpoints.push(new CheckPoint(travelDirections.get(i), nc));
-				}
-
 				//Travel the given travel direction
 				cCell = travelStraight(maze, cCell, travelDir);
 			}
 			//If there are no directions that can be travelled from here
 			else {
-				//Get the most recent checkpoint
-				CheckPoint cp = checkpoints.pop();
-				//Revert the state to the checkpoint
-				cCell = cp.cell;
-				travelDir = cp.direction;
+				//Revert to the most recent checkpoint
+				revertCheckpoint(checkpoints, cCell, travelDir);
+				//Do not go through a tunnel after reverting to a checkpoint
+				tunneled = true;
 			}
 
 			//Draw to visualize that a cell has been visited
@@ -219,6 +214,24 @@ public class WallFollowerSolver implements MazeSolver {
 		//Return the list of possible travel directions starting from
 		//the leftmost possible direction in clockwise order
 		return directions;
+	}
+
+	private void addCheckpoints(int startIndex, Cell cCell, Stack<CheckPoint> cps, ArrayList<Integer> directions) {
+		//Iterate through the given travel directions starting at the start index
+		for(int i = startIndex; i < directions.size(); i++) {
+			//Gets the neighbouring cell in the travel direction
+			Cell nc = cCell.neigh[directions.get(i)];
+			//Add them to the list of checkpoints in clockwise order
+			cps.push(new CheckPoint(directions.get(i), nc));
+		}
+	}
+
+	private void revertCheckpoint(Stack<CheckPoint> cps, Cell cCell, int travelDir) {
+		//Get the most recent checkpoint
+		CheckPoint cp = cps.pop();
+		//Revert the state to the checkpoint
+		cCell = cp.cell;
+		travelDir = cp.direction;
 	}
     
     

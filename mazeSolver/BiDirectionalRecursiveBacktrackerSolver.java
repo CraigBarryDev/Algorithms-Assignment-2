@@ -127,8 +127,6 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 	}
 
 	private Cell goThroughTunnel(Maze maze, Cell cell, LinkedList<Cell> path, boolean[][] visitedCells) {
-		System.out.println("<GOING THROUGH A TUNNEL>");
-
 		//Get the row and column indices of the current cell
 		int cellRow = cell.r;
 		int cellCol = cell.c;
