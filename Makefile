@@ -76,7 +76,7 @@ tunnel_backtrack_backtrack:
 
 tunnel_backtrack_wallfollow:
 	make compile
-	$(JAVA) $(FLAGS) $(BIN) MazeTester tunnel_backtrack_wallfollow.para n
+	$(JAVA) $(FLAGS) $(BIN) MazeTester tunnel_backtrack_wallfollow.para y
 
 
 
