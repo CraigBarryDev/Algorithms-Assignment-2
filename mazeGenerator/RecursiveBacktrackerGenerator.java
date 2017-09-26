@@ -42,6 +42,22 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 			//Get the unvisited neighbours of the current cell
 			ArrayList<Cell> unvisitedNeighbours = getUnvisitedNeighbours(maze, cCell, visited);
 
+			if(cCell.tunnelTo != null) {
+				//Get the row and column indices of the current cell
+				cellRow = cCell.tunnelTo.r;
+				cellCol = cCell.tunnelTo.c;
+
+				//If the maze is a hex maze
+				if(maze.type == Maze.HEX)
+					//Decrement column to be in the 0 to C-1  range
+					cellCol -= (cellRow + 1) / 2;
+
+				if(!visited[cellRow][cellCol]) {
+					unvisitedNeighbours.clear();
+					unvisitedNeighbours.add(cCell.tunnelTo);
+				}
+			}
+
 			//If there are unvisited neighbours at this cell
 			if(unvisitedNeighbours.size() != 0) {
 				//Add the current cell the current path
@@ -52,31 +68,29 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 				carvePath(maze, cCell, nextCell);
 				//The next cell will now become the current cell
 				cCell = nextCell;
-				
-				
 
-				//If the next cell is a tunnel
-				if(cCell.tunnelTo != null) {
-					//Get the row and column indices of the current cell
-					cellRow = cCell.r;
-					cellCol = cCell.c;
+				// //If the next cell is a tunnel
+				// if(cCell.tunnelTo != null) {
+				// 	//Get the row and column indices of the current cell
+				// 	cellRow = cCell.r;
+				// 	cellCol = cCell.c;
 
-					//If the maze is a hex maze
-					if(maze.type == Maze.HEX)
-						//Decrement column to be in the 0 to C-1  range
-						cellCol -= (cellRow + 1) / 2;
+				// 	//If the maze is a hex maze
+				// 	if(maze.type == Maze.HEX)
+				// 		//Decrement column to be in the 0 to C-1  range
+				// 		cellCol -= (cellRow + 1) / 2;
 
-					if(!visited[cellRow][cellCol]) {
-						nVisited++;
-					}
+				// 	if(!visited[cellRow][cellCol]) {
+				// 		nVisited++;
+				// 	}
 
-					//Set the current cell as visited
-					visited[cellRow][cellCol] = true;
+				// 	//Set the current cell as visited
+				// 	visited[cellRow][cellCol] = true;
 
-					path.add(cCell);
+				// 	path.add(cCell);
 
-					cCell = cCell.tunnelTo;
-				}
+				// 	cCell = cCell.tunnelTo;
+				// }
 			}else {
 				if(path.size() == 0) {
 					System.out.println("GENERATION FAILED");
@@ -92,6 +106,13 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 			}
 
 		}while(nVisited != maze.sizeC * maze.sizeR);
+
+		for(int i = 0; i < maze.sizeR; i++) {
+			for(int j = 0; j < maze.sizeC; j++) {
+				if(!visited[i][j])
+					System.out.println("MISSED VISITING CELL <" + i + "><" + j + ">");
+			}
+		}
 		
 	}
 
@@ -166,10 +187,12 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 			}
 		}
 
-		//Set the wall to present from c1
-		m.map[c1.r][c1.c].wall[dir].present = false;
-		//Set the same wall present from c2
-		m.map[c2.r][c2.c].wall[Maze.oppoDir[dir]].present = false;
+		if(dir != -1) {
+			//Set the wall to present from c1
+			m.map[c1.r][c1.c].wall[dir].present = false;
+			//Set the same wall present from c2
+			m.map[c2.r][c2.c].wall[Maze.oppoDir[dir]].present = false;
+		}	
 	}
 
 } // end of class RecursiveBacktrackerGenerator

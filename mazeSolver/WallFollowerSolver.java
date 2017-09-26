@@ -77,7 +77,7 @@ public class WallFollowerSolver implements MazeSolver {
 				//this will ensure we are traveling the same direction if we exit the tunnel
 				tunnelDirections.put(cCell, travelDir);
 				//Get the possible travel directions
-				ArrayList<Integer> travelDirections = getPossibleTravelDirections(maze, cCell, travelDir, visited);
+				ArrayList<Integer> travelDirections = getPossibleTravelDirections(maze, cCell, travelDir, visited, false);
 				//Add all the possible directions from the start of the tunnel 
 				addCheckpoints(0, cCell, checkpoints, travelDirections);
 				//Move through the tunnel
@@ -91,10 +91,13 @@ public class WallFollowerSolver implements MazeSolver {
 				cellsExplored++;
 				//Draw to visualize that a cell has been visited
 				maze.drawFtPrt(cCell);
+				tunneled = true;
+			}else {
+				tunneled = false;
 			}
 
 			//Get the possible travel directions
-			ArrayList<Integer> travelDirections = getPossibleTravelDirections(maze, cCell, travelDir, visited);
+			ArrayList<Integer> travelDirections = getPossibleTravelDirections(maze, cCell, travelDir, visited, tunneled);
 
 			System.out.println("CURRENT CELL, <" + cCell.c + "><" + cCell.r + ">");
 
@@ -119,7 +122,7 @@ public class WallFollowerSolver implements MazeSolver {
 				travelDir = cp.direction;
 				System.out.println("CHECKPOINT REVERTED, <" + cCell.c + "><" + cCell.r + ">");
 				//Do not go through a tunnel after reverting to a checkpoint
-				// tunneled = true;
+				tunneled = true;
 			}
 
 			//Draw to visualize that a cell has been visited
@@ -192,7 +195,7 @@ public class WallFollowerSolver implements MazeSolver {
 		return !c.wall[dir].present;
 	}
 
-	private ArrayList<Integer> getPossibleTravelDirections(Maze m, Cell c, int dir, boolean[][] visited) {
+	private ArrayList<Integer> getPossibleTravelDirections(Maze m, Cell c, int dir, boolean[][] visited, boolean tunneled) {
 		//Stores the possible travelDirections
 		ArrayList<Integer> directions = new ArrayList();
 
@@ -216,6 +219,20 @@ public class WallFollowerSolver implements MazeSolver {
 
 			//Turn right
 			cDir = turn(m, cDir, RIGHT);
+		}
+
+		//If you just went through a tunnel, include the opposite direction
+		if(tunneled) {
+			//If this is a possible way that can be travelled
+			if(c.neigh[cDir] != null) {
+				//If it is possible to move in this direction and the cell hasn't been visited
+				if(canMoveStraight(c, cDir) &&
+					!visited[c.neigh[cDir].r][convertCellCol(m, c.neigh[cDir])]) {
+
+					//Add it to the list of possible directions
+					directions.add(cDir);
+				}
+			}
 		}
 		
 		//Return the list of possible travel directions starting from

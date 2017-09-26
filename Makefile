@@ -52,7 +52,7 @@ norm_backtrack_backtrack:
 
 norm_backtrack_wallfollow:
 	make compile
-	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_backtrack_wallfollow.para y
+	$(JAVA) $(FLAGS) $(BIN) MazeTester norm_backtrack_wallfollow.para n
 
 norm_growtree_backtrack:
 	make compile
@@ -76,7 +76,7 @@ tunnel_backtrack_backtrack:
 
 tunnel_backtrack_wallfollow:
 	make compile
-	$(JAVA) $(FLAGS) $(BIN) MazeTester tunnel_backtrack_wallfollow.para y
+	$(JAVA) $(FLAGS) $(BIN) MazeTester tunnel_backtrack_wallfollow.para n
 
 
 
