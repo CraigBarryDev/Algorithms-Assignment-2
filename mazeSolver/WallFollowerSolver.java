@@ -72,7 +72,6 @@ public class WallFollowerSolver implements MazeSolver {
 			// through a tunnel, as to not get the function in an infinite loop of moving
 			// through the same tunnel)
 			if(cCell.tunnelTo != null && !tunneled) {
-				System.out.println(">>>>>>>GOING TO TUNNEL, <" + cCell.c + "><" + cCell.r + ">");
 				//Set the entrance tunnel's travel direction to the current travel direction,
 				//this will ensure we are traveling the same direction if we exit the tunnel
 				tunnelDirections.put(cCell, travelDir);
@@ -82,7 +81,6 @@ public class WallFollowerSolver implements MazeSolver {
 				addCheckpoints(0, cCell, checkpoints, travelDirections);
 				//Move through the tunnel
 				cCell = cCell.tunnelTo;
-				System.out.println(">>>>>>>>EXITTING TUNNEL, <" + cCell.c + "><" + cCell.r + ">");
 				//Set the travel direction to the exit tunnel's travel direction, this will ensure
 				//If we go through the tunnel multiple times we check all directions rather than
 				//whatever direction we were travelling when we went through the entrance portal
@@ -99,11 +97,8 @@ public class WallFollowerSolver implements MazeSolver {
 			//Get the possible travel directions
 			ArrayList<Integer> travelDirections = getPossibleTravelDirections(maze, cCell, travelDir, visited, tunneled);
 
-			System.out.println("CURRENT CELL, <" + cCell.c + "><" + cCell.r + ">");
-
 			//If there is more than 1 direction that can be travlled
 			if(travelDirections.size() != 0) {
-				System.out.println("ADDING CHECKPOINTS");
 				//Add the additional directions to 
 				addCheckpoints(1, cCell, checkpoints, travelDirections);
 				//Set the travel direction to the leftmost direction
@@ -114,13 +109,11 @@ public class WallFollowerSolver implements MazeSolver {
 			}
 			//If there are no directions that can be travelled from here
 			else {
-				System.out.println("REVERTING CHECKINGPOINT, <" + cCell.c + "><" + cCell.r + ">");
 				//Get the most recent checkpoint
 				CheckPoint cp = checkpoints.pop();
 				//Revert the state to the checkpoint
 				cCell = cp.cell;
 				travelDir = cp.direction;
-				System.out.println("CHECKPOINT REVERTED, <" + cCell.c + "><" + cCell.r + ">");
 				//Do not go through a tunnel after reverting to a checkpoint
 				tunneled = true;
 			}
