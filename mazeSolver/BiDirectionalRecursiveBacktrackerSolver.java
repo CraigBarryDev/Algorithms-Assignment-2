@@ -40,7 +40,7 @@ public class BiDirectionalRecursiveBacktrackerSolver implements MazeSolver {
 		do {
 			//Do 1 step in the DFS search of both steps
 			cCellFEntrance = dfsStep(maze, cCellFEntrance, entrancePath, entranceVisited);
-			// cCellFExit = dfsStep(maze, cCellFExit, exitPath, exitVisited);
+			cCellFExit = dfsStep(maze, cCellFExit, exitPath, exitVisited);
 
 			//Get the row and column indices of the current cell
 			int cellRow = cCellFExit.r;
